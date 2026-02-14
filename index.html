@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="id" class="h-full scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart UMKM - Direktori Data</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-text {
+            background: linear-gradient(135deg, #059669 0%, #0d9488 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+
+    <header class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex justify-center md:justify-start items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center text-emerald-600 font-bold shadow-sm">
+                        <img src="logo-no_bg.png" alt="logo">
+                    </div>
+                    <span class="Itext-xl md:text-2xl font-bold gradient-text">Responden UMKM</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="pt-28 pb-20 px-4">
+        <div class="max-w-6xl mx-auto text-center mb-12">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">
+                Direktori <span class="gradient-text">UMKM Kota Gorontalo</span>
+            </h1>
+            <p class="text-slate-500 max-w-xl mx-auto">
+                Data Mitra Responden UMKM Kota Gorontalo
+            </p>
+            <p class="text-sm text-slate-400 mt-2">
+                Terimakasih atas partisipasinya dalam kuisioner ini 😇🙏
+            </p>
+        </div>
+
+        <section x-data="umkmDirectory()" class="max-w-6xl mx-auto">
+            
+            <div class="flex justify-end mb-6">
+                <button @click="fetchData()" 
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:text-emerald-600 hover:border-emerald-200 transition-all shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    <span>Refresh Data</span>
+                </button>
+            </div>
+
+            <div x-show="isLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <template x-for="i in 6">
+                    <div class="bg-white p-6 rounded-xl border border-slate-100 shadow-sm animate-pulse flex items-center gap-4">
+                        <div class="w-12 h-12 bg-slate-200 rounded-full flex-shrink-0"></div>
+                        <div class="w-full">
+                            <div class="h-4 bg-slate-200 rounded w-1/3 mb-2"></div>
+                            <div class="h-6 bg-slate-200 rounded w-3/4"></div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <div x-show="isError" x-cloak class="p-6 bg-red-50 text-red-600 rounded-xl border border-red-100 text-center">
+                <p class="font-semibold">Gagal memuat data.</p>
+                <p class="text-sm mt-1">Periksa koneksi internet atau URL API Anda.</p>
+            </div>
+
+            <div x-show="!isLoading && !isError" x-cloak class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <template x-for="item in umkmList" :key="item.id">
+                    
+                    <div class="group relative bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md hover:border-emerald-300 hover:-translate-y-1 transition-all duration-300 flex items-start gap-4 overflow-hidden">
+                        
+                        <div class="absolute -right-4 -top-4 w-16 h-16 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-500"></div>
+
+                        <div class="relative z-10 w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 flex-shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                        </div>
+
+                        <div class="relative z-10">
+                            <p class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-1" x-text="item.kategori"></p>
+                            <h3 class="text-lg font-bold text-slate-800 leading-tight group-hover:text-emerald-700 transition-colors" x-text="item.nama_usaha"></h3>
+                        </div>
+
+                    </div>
+                </template>
+            </div>
+
+            <div x-show="!isLoading && umkmList.length === 0" x-cloak class="text-center py-12">
+                <div class="inline-block p-4 rounded-full bg-slate-100 mb-4">
+                    <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                </div>
+                <p class="text-slate-500">Data tidak ditemukan.</p>
+            </div>
+
+        </section>
+    </main>
+
+    <footer class="text-center py-8 text-slate-400 text-sm">
+        &copy; 2026 UMKM Kota Gorontalo
+    </footer>
+
+    <script>
+        function umkmDirectory() {
+            return {
+                isLoading: true,
+                isError: false,
+                umkmList: [],
+                
+                // Masukkan URL Web App Google Script Anda di sini nanti
+                apiUrl: 'https://script.google.com/macros/s/AKfycbz8Tq-_nW0U-qn3u-DgVaXNd-fX7_UosyKjIRT7p45hfOZQ_iEXCt3ORlSui0glPxHseg/exec', 
+
+                init() {
+                    this.fetchData();
+                },
+
+                async fetchData() {
+                    this.isLoading = true;
+                    this.isError = false;
+
+                    try {
+                        // 1. Minta data ke Google Script
+                        const response = await fetch(this.apiUrl);
+                        
+                        // 2. Cek apakah sukses
+                        if (!response.ok) throw new Error('Gagal mengambil data');
+
+                        // 3. Ubah hasil menjadi JSON
+                        const data = await response.json();
+                        
+                        // 4. Masukkan data asli ke variabel
+                        // (Google Script kadang mengembalikan object 'result' atau langsung array)
+                        // Kode di bawah berjaga-jaga untuk kedua format
+                        if (data.status === 'error') {
+                            throw new Error(data.message);
+                        }
+                        
+                        this.umkmList = Array.isArray(data) ? data : (data.data || []);
+
+                        console.log("Data berhasil diambil:", this.umkmList); // Cek di Console Browser (F12)
+
+                    } catch (error) {
+                        console.error('Error fetching data:', error);
+                        this.isError = true;
+                    } finally {
+                        this.isLoading = false;
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
